@@ -5,6 +5,19 @@ const budgetController = (function() {
         this.id = id,
         this.description = description,
         this.value = value
+        this.percentage = -1
+    }
+
+    Expense.prototype.calcPercentage = function(totalIncome) {
+        if (totalIncome > 0) {
+            this.percentage = Math.round((this.value / totalIncome) * 100)
+        } else {
+            this.percentage = -1
+        }
+    }
+
+    Expense.prototype.getPercentage = function() {
+        return this.percentage
     }
 
     const Income = function(id, description, value) {
@@ -49,7 +62,7 @@ const budgetController = (function() {
             if (type === 'exp') {
                 newItem = new Expense(ID, des, val)
             } else if (type === 'inc') {
-                newItem = new Expense(ID, des, val)
+                newItem = new Income(ID, des, val)
             }
 
             // push it into our data structure
@@ -98,6 +111,19 @@ const budgetController = (function() {
                 totalExp: data.totals.exp,
                 percentage: data.percentage
             }
+        },
+
+        calculatePercentages: function() {
+            data.allItems.exp.forEach(function(cur) {
+                cur.calcPercentage(data.totals.inc)
+            })
+        },
+
+        getPercentages: function() {
+            let allPerc = data.allItems.exp.map(function(cur) {
+                return cur.getPercentage()
+            })
+            return allPerc
         },
 
         testing: function() {
@@ -151,6 +177,11 @@ const UIController = (function() {
 
             // Insert the HTML into the DOM 
             document.querySelector(element).insertAdjacentHTML("beforeend", newHTML)
+        },
+
+        deleteListItem: function(selectorID) {
+            let el = document.getElementById(selectorID)
+            el.parentNode.removeChild(el) 
         },
 
         clearField: function() {
@@ -214,6 +245,18 @@ const controller = (function(budgetCtrl, UICtrl) {
         UICtrl.displayBudget(budget)
     }
 
+    const updatePercentages = function() {
+
+        // 1. Calculate percentages
+        budgetCtrl.calculatePercentages()
+
+        // 2. Return percentages
+        let percentages = budgetCtrl.getPercentages()
+
+        // 3. Update the UI with the new percentages
+        console.log(`percentages = ${percentages}`)
+    }
+
     const ctrlAddItem = function() {
         let input, newItem
 
@@ -234,6 +277,9 @@ const controller = (function(budgetCtrl, UICtrl) {
             // 5. Calculate and return budget
             calculateBudget()
 
+            // 6. Update percentages
+            updatePercentages()
+
         }
     }
 
@@ -242,22 +288,23 @@ const controller = (function(budgetCtrl, UICtrl) {
         
         itemID = event.target.parentNode.parentNode.parentNode.parentNode.id
 
-        console.log(`itemID = ${itemID}`)
-
         if (itemID) {
             splitID = itemID.split('-')
             type = splitID[0]
             ID = parseInt(splitID[1])
         }
 
-        console.log(`type = ${type}`)
-
         // 1. Delete the item from the data structure
         budgetCtrl.deleteItem(type, ID)
 
         // 2. Delete the item from the UI
+        UICtrl.deleteListItem(itemID)
 
         // 3. Update and show the new budget
+        calculateBudget()
+
+        // 4. Update percentages
+        updatePercentages()
     }
 
     return {
