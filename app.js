@@ -59,6 +59,21 @@ const budgetController = (function() {
             return newItem
         },
 
+        deleteItem: function(type, id) {
+            let ids, index
+
+            ids = data.allItems[type].map(function(cur) {
+                return cur.id
+            })
+
+            index = ids.indexOf(id)
+
+            if (index !== -1) {
+                data.allItems[type].splice(index, 1)
+            }
+
+        },
+
         calculateBudget: function() {
             
             // 1. Calculate totals inc and exp
@@ -225,15 +240,20 @@ const controller = (function(budgetCtrl, UICtrl) {
     const ctrlDeleteItem = function(event) {
         let itemID, splitID, type, ID
         
-        itemID = console.log(event.target.parentNode.parentNode.parentNode.parentNode.id)
+        itemID = event.target.parentNode.parentNode.parentNode.parentNode.id
+
+        console.log(`itemID = ${itemID}`)
 
         if (itemID) {
             splitID = itemID.split('-')
             type = splitID[0]
-            ID = splitID[1]
+            ID = parseInt(splitID[1])
         }
 
+        console.log(`type = ${type}`)
+
         // 1. Delete the item from the data structure
+        budgetCtrl.deleteItem(type, ID)
 
         // 2. Delete the item from the UI
 
