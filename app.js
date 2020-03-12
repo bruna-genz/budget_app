@@ -104,7 +104,8 @@ const UIController = (function() {
         budgetLabel: '.budget__value',
         incomeValueLabel: '.budget__income--value',
         expensesValueLabel: '.budget__expenses--value',
-        percentageLabel: '.budget__expenses--percentage'
+        percentageLabel: '.budget__expenses--percentage',
+        container: '.container'
     }
     
     return {
@@ -122,10 +123,10 @@ const UIController = (function() {
             // Create and HTML string with a placehorder text
             if (type === 'inc') {
                 element = DOMstrings.incomeContainer
-                HTML = '<div class="item clearfix" id="income-%id%"><div class="item__description">%description%</div><div class="right clearfix"><div class="item__value">%value%</div><div class="item__delete"><button class="item__delete--btn"><i class="ion-ios-close-outline"></i></button></div></div></div>'
+                HTML = '<div class="item clearfix" id="inc-%id%"><div class="item__description">%description%</div><div class="right clearfix"><div class="item__value">%value%</div><div class="item__delete"><button class="item__delete--btn"><i class="ion-ios-close-outline"></i></button></div></div></div>'
             } else if (type === 'exp') {
                 element = DOMstrings.expensesContainer
-                HTML = '<div class="item clearfix" id="expense-%id%"><div class="item__description">%description%</div><div class="right clearfix"><div class="item__value">%value%</div><div class="item__percentage">21%</div><div class="item__delete"><button class="item__delete--btn"><i class="ion-ios-close-outline"></i></button></div></div></div>'
+                HTML = '<div class="item clearfix" id="exp-%id%"><div class="item__description">%description%</div><div class="right clearfix"><div class="item__value">%value%</div><div class="item__percentage">21%</div><div class="item__delete"><button class="item__delete--btn"><i class="ion-ios-close-outline"></i></button></div></div></div>'
             }
 
             // Replace the placeholder text with an actual data
@@ -175,13 +176,15 @@ const controller = (function(budgetCtrl, UICtrl) {
     const setUpEventListeners = function() {
         let DOM = UICtrl.getDOMstrings()
 
-        document.querySelector(DOM.inputBtn).addEventListener('click', ctrlAddItem);
+        document.querySelector(DOM.inputBtn).addEventListener('click', ctrlAddItem)
 
         document.addEventListener('keypress', function(event) {
             if (event.keyCode === 13 || event.which === 13) {
-                ctrlAddItem();
+                ctrlAddItem()
             }
         });
+
+        document.querySelector(DOM.container).addEventListener('click', ctrlDeleteItem)
     }
 
     const calculateBudget = function() {
@@ -217,7 +220,25 @@ const controller = (function(budgetCtrl, UICtrl) {
             calculateBudget()
 
         }
-    };
+    }
+
+    const ctrlDeleteItem = function(event) {
+        let itemID, splitID, type, ID
+        
+        itemID = console.log(event.target.parentNode.parentNode.parentNode.parentNode.id)
+
+        if (itemID) {
+            splitID = itemID.split('-')
+            type = splitID[0]
+            ID = splitID[1]
+        }
+
+        // 1. Delete the item from the data structure
+
+        // 2. Delete the item from the UI
+
+        // 3. Update and show the new budget
+    }
 
     return {
         init: function() {
